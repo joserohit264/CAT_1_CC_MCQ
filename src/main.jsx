@@ -225,6 +225,38 @@ function App() {
             </div>
             <div className="question-progress-track"><div className={`question-progress-fill ${isSubmitted ? 'submitted' : ''}`} style={{ width: `${(answeredCount / 10) * 100}%` }} /></div>
 
+            <div className="question-nav-strip" aria-label="Question Navigation">
+              <span className="q-nav-label">Questions:</span>
+              <div className="q-nav-buttons">
+                {section.questions.map((_, qIdx) => {
+                  const isAnswered = currentResponses[qIdx] !== undefined;
+                  const isCorrect = isSubmitted && currentResponses[qIdx] === section.questions[qIdx].answer;
+                  const isWrong = isSubmitted && currentResponses[qIdx] !== section.questions[qIdx].answer;
+                  let statusClass = '';
+                  if (isCorrect) statusClass = 'q-correct';
+                  else if (isWrong) statusClass = 'q-wrong';
+                  else if (isAnswered) statusClass = 'q-answered';
+
+                  return (
+                    <button
+                      key={qIdx}
+                      type="button"
+                      className={`q-nav-btn ${statusClass}`}
+                      onClick={() => {
+                        const target = document.getElementById(`q-${qIdx}`);
+                        if (target) {
+                          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                      }}
+                      title={`Jump to Question ${qIdx + 1}${isAnswered ? ' (Answered)' : ''}`}
+                    >
+                      {qIdx + 1}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             {isSubmitted && (
               <div className={`result-banner ${sectionScore >= 7 ? 'result-good' : sectionScore >= 5 ? 'result-mid' : 'result-low'}`}>
                 <div className="result-symbol">{sectionScore >= 7 ? <Trophy size={22} /> : <ClipboardCheck size={22} />}</div>
@@ -242,7 +274,12 @@ function App() {
                 const isCorrect = isSubmitted && selected === question.answer;
                 const isWrong = isSubmitted && selected !== question.answer;
                 return (
-                  <article className={`question-card ${isSubmitted ? (isCorrect ? 'question-correct' : 'question-wrong') : ''}`} key={`${activeSection}-${questionIndex}`}>
+                  <article
+                    id={`q-${questionIndex}`}
+                    style={{ scrollMarginTop: '96px' }}
+                    className={`question-card ${isSubmitted ? (isCorrect ? 'question-correct' : 'question-wrong') : ''}`}
+                    key={`${activeSection}-${questionIndex}`}
+                  >
                     <div className="question-topline">
                       <span className="question-index">Q{String(questionIndex + 1).padStart(2, '0')}</span>
                       {isSubmitted && (
